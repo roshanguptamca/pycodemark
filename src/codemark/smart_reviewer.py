@@ -12,9 +12,6 @@ formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
 
 def read_file(file_path: str) -> str:
     """Reads a Python file and returns its content."""
@@ -33,6 +30,9 @@ def smart_review(path: str, config: dict = None) -> list[dict]:
         config = {}
 
     issues = []
+
+    # Initialize OpenAI client
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     # Collect Python files
     python_files = []
@@ -55,7 +55,7 @@ def smart_review(path: str, config: dict = None) -> list[dict]:
         model = os.environ.get("CODEMARK_MODEL", "gpt-5")
         try:
             response = client.chat.completions.create(
-                    model=model,
+                model=model,
                 messages=[
                     {
                         "role": "system",
