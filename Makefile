@@ -80,3 +80,9 @@ review-sarif:
 publish: build
 	@echo "Publishing PyCodemark to PyPI..."
 	$(POETRY) publish --username __token__ --password $$PYPI_TOKEN
+
+# Generate docs
+.PHONY: docs
+docs:
+	pandoc README.md -o pycodemark-docs.pdf --metadata title="PyCodemark Documentation"
+	pandoc README.md -s -o pycodemark-docs.html
