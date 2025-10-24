@@ -62,9 +62,53 @@ codemark review src/
 codemark review src/ --format json
 codemark review src/ --format sarif    
 ```
+Environment Variables
+
+PyCodemark requires an OpenAI API key to perform AI-powered smart code reviews. You can also optionally specify which OpenAI model to use.
+
+1. OpenAI API Key
+
+Set your API key as an environment variable:
+```bash
+export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx" 
+```
+This is required for the smart-review command.
+
+The tool will use this key to authenticate with the OpenAI API.
+
+You can obtain your key from OpenAI API Keys
+2. 2. Optional: Specify AI Model
+
+By default, PyCodemark uses the gpt-5 model for smart reviews. 
+You can override it with the environment variable CODEMARK_MODEL:
+
+```bash
+export CODEMARK_MODEL="gpt-5" 
+```
+
+If not set, gpt-5 will be used automatically.
+You can specify any OpenAI chat-capable model available to your account.
+Example models: gpt-5, gpt-5.1, gpt-4, gpt-4-32k.
+
+Quick Example:
+```bash
+export OPENAI_API_KEY="sk-xxxx"
+export CODEMARK_MODEL="gpt-5"
+
+# Run AI-powered review
+codemark smart-review src/
+
+```
+Any issues detected by the AI will appear in the terminal table, JSON, or SARIF output depending on the chosen --format.
+
+If your quota is exceeded or the API fails, the tool will log the error in the report.
+
+4. Security Tips
+Do not commit your API key to version control.
+Store keys securely in environment variables or secret managers.
+You can also use .env files with tools like direnv or python-dotenv.
 
 Plugins
-
 Extend PyCodemark by adding custom checks under src/codemark/plugins/.
 Each plugin must implement:
 ```python`

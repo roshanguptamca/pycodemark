@@ -1,6 +1,7 @@
 import tomli
 from pathlib import Path
 
+
 def load_config():
     """
     Load Codemark configuration from pyproject.toml.

@@ -1,6 +1,7 @@
 import importlib
 import pkgutil
 
+
 def load_plugins():
     """
     Load and return all plugin modules from the codemark/plugins directory.
