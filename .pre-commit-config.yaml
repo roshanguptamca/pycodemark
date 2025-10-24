@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: codemark
+        name: codemark-review
+        entry: codemark review --format terminal
+        language: system
+        types: [python]

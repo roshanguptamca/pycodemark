@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "pycodemark"
+version = "0.2.0"
+description = "PyCodemark – a full-featured code review tool for Python."
+authors = ["Roshan <roshanguptamca@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/yourusername/pycodemark"
+repository = "https://github.com/yourusername/pycodemark"
+documentation = "https://github.com/yourusername/pycodemark#readme"
+keywords = ["python", "code", "review", "linter", "cli", "static-analysis", "quality"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities"
+]
+packages = [{include = "codemark", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.13"
+rich = "^14.0"
+tomli = "^2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+ruff = "^0.0.280"
+pre-commit = "^3.3.3"
+
+[tool.poetry.scripts]
+pycodemark = "codemark.console:main"
+
+[tool.codemark]
+max_line_length = 88
+rules = ["PEP8", "clarity", "docstrings"]
