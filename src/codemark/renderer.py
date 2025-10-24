@@ -28,7 +28,8 @@ def print_sarif_report(report):
             "results": [{
                 "ruleId": s.split("–")[1].strip(" []") if "–" in s else "UNKNOWN",
                 "message": {"text": f"{s} {sug}"},
-                "locations": [{"physicalLocation": {"artifactLocation": {"uri": s.split(':')[0]}, "region": {"startLine": int(s.split(':')[1])}}}]
+                "locations": [{"physicalLocation": {"artifactLocation": {"uri": s.split(':')[0]},
+                                                    "region": {"startLine": int(s.split(':')[1])}}}]
             } for s, sug in report]
         }]
     }

@@ -1,21 +1,23 @@
-# Makefile for Codemark
+# Makefile for PyCodemark
 
 # Python and Poetry commands
 PYTHON := python3.13
 POETRY := poetry
+SRC := src
 
 # Default target
 .PHONY: help
 help:
-	@echo "Codemark Makefile Commands:"
+	@echo "PyCodemark Makefile Commands:"
 	@echo "  make install       - Install dependencies via Poetry"
 	@echo "  make venv          - Create virtual environment"
-	@echo "  make build         - Build Codemark package"
+	@echo "  make build         - Build PyCodemark package"
 	@echo "  make test          - Run pytest tests"
 	@echo "  make lint          - Run ruff linter"
-	@echo "  make review        - Run Codemark review on src/"
-	@echo "  make review-json   - Run Codemark review with JSON output"
-	@echo "  make review-sarif  - Run Codemark review with SARIF output"
+	@echo "  make review        - Run PyCodemark review on src/"
+	@echo "  make review-json   - Run PyCodemark review with JSON output"
+	@echo "  make review-sarif  - Run PyCodemark review with SARIF output"
+	@echo "  make version       - Generate dynamic version (Git or timestamp)"
 	@echo "  make publish       - Build and publish package to PyPI"
 
 # Create virtual environment
@@ -29,11 +31,21 @@ venv:
 install:
 	$(POETRY) install
 
+.PHONY: version
+version:
+	@echo "Generating dynamic version..."
+	@if git describe --tags --abbrev=0 >/dev/null 2>&1; then \
+		VERSION=$$(git describe --tags --abbrev=0); \
+	else \
+		VERSION=0.2.$$(date +%Y%m%d%H%M); \
+	fi; \
+	echo "__version__ = '$$VERSION'" > $(SRC)/codemark/version.py; \
+	echo "Version generated: $$VERSION"
+
 # Build package
 .PHONY: build
-build:
+build: version
 	$(POETRY) build
-
 # Run tests
 .PHONY: test
 test:
@@ -42,24 +54,29 @@ test:
 # Run linter
 .PHONY: lint
 lint:
-	$(POETRY) run ruff src/
+	$(POETRY) run ruff $(SRC)/
 
-# Run Codemark review (terminal output)
+.PHONY: lint-fix
+lint-fix:
+	$(POETRY) run ruff src/ --fix
+
+# Run PyCodemark review (terminal output)
 .PHONY: review
 review:
-	$(POETRY) run codemark review src/ --format terminal
+	$(POETRY) run pycodemark review $(SRC)/ --format terminal
 
-# Run Codemark review (JSON output)
+# Run PyCodemark review (JSON output)
 .PHONY: review-json
 review-json:
-	$(POETRY) run codemark review src/ --format json
+	$(POETRY) run pycodemark review $(SRC)/ --format json
 
-# Run Codemark review (SARIF output)
+# Run PyCodemark review (SARIF output)
 .PHONY: review-sarif
 review-sarif:
-	$(POETRY) run codemark review src/ --format sarif
+	$(POETRY) run pycodemark review $(SRC)/ --format sarif
 
 # Publish package to PyPI
 .PHONY: publish
-publish:
-	$(POETRY) publish --build --username __token__ --password $(PYPI_TOKEN)
+publish: build
+	@echo "Publishing PyCodemark to PyPI..."
+	$(POETRY) publish --username __token__ --password $$PYPI_TOKEN
