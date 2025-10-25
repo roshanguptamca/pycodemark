@@ -183,6 +183,23 @@ exclude = ["tests/", "migrations/"]
 - make publish       # Publish to PyPI
 
 
+```
+- **NEW:** Auto-generate missing unit tests  
+  - `pycodemark gen-tests src/` → scans your source code for functions without tests  
+  - Creates or appends to files like `tests/test_<module>.py`  
+  - Supports `--ai` for GPT-5-powered intelligent test generation  
+  - Ideal for boosting test coverage quickly
+
+## AI-Powered Unit Test Generation
+Automatically generate tests for functions without coverage:
+Command	Description:
+```bash
+pycodemark gen-tests src/	# Generate basic pytest test stubs
+pycodemark gen-tests src/ --ai	# Generate AI-assisted realistic tests
+pycodemark gen-tests src/ --overwrite	# Replace existing test files
+pycodemark gen-tests src/ --include-private	# Include private functions in test generation
+```
+
 ## Download Documentation:
 PDF
 HTML
@@ -190,12 +207,3 @@ HTML
 License
 
 MIT License © Roshan Gupta
-```yaml
-
----
-
-If you want, I can also provide a **one-liner command** so you can generate this README automatically on your Mac without manually copying it.  
-
-Do you want me to do that next?
-
-```

@@ -1,12 +1,11 @@
-"""Module description."""
+"""AI-powered smart code reviewer using GPT-5."""
 
 import os
 import json
 import logging
-from openai import OpenAI
-from openai._exceptions import OpenAIError, RateLimitError, APIError
 from .config import load_config
-from .analyzer import get_python_files, read_file  # Ensure read_file exists in analyzer.py
+from .analyzer import get_python_files, read_file
+from .ai_client import client
 
 # Logger setup
 logger = logging.getLogger(__name__)
@@ -17,24 +16,31 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-def smart_review(path: str, config: dict = None) -> list[dict]:
+def smart_review(path: str, config: dict | None = None) -> list[dict]:
     """
     Perform AI-powered code review using GPT-5 on Python files.
+
+    Args:
+        path (str): File or directory path to analyze
+        config (dict | None): Optional configuration
+
     Returns:
-        List[dict]: Each dict contains 'file', 'line', 'code', 'message', 'level'
+        list[dict]: Each dict contains 'file', 'line', 'code', 'message', 'level'
     """
     if config is None:
         config = load_config()
 
-    issues = []
+    issues: list[dict] = []
     checks = config.get("checks", {})
 
     # Skip AI review if disabled
     if not checks.get("ai_review", True):
         return issues
 
-    # Initialize OpenAI client
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    # Validate AI client
+    if not client:
+        logger.warning("⚠️ AI client unavailable. Skipping GPT review.")
+        return issues
 
     # Collect Python files
     python_files = get_python_files(path)
@@ -85,18 +91,9 @@ def smart_review(path: str, config: dict = None) -> list[dict]:
                     {"file": file_path, "line": 0, "code": "AIReview", "message": ai_output, "level": "error"}
                 )
 
-        except RateLimitError as e:
-            logger.error("RateLimitError for %s: %s", file_path, e)
-            issues.append({"file": file_path, "line": 0, "code": "RateLimitError", "message": str(e), "level": "error"})
-        except APIError as e:
-            logger.error("APIError for %s: %s", file_path, e)
-            issues.append({"file": file_path, "line": 0, "code": "APIError", "message": str(e), "level": "error"})
-        except OpenAIError as e:
-            logger.error("OpenAIError for %s: %s", file_path, e)
-            issues.append({"file": file_path, "line": 0, "code": "OpenAIError", "message": str(e), "level": "error"})
         except Exception as e:
-            logger.error("Unknown error for %s: %s", file_path, e)
-            issues.append({"file": file_path, "line": 0, "code": "UnknownError", "message": str(e), "level": "error"})
+            logger.error("AI review failed for %s: %s", file_path, e)
+            issues.append({"file": file_path, "line": 0, "code": "OpenAIError", "message": str(e), "level": "error"})
 
     if issues:
         logger.warning("Found %d issue(s) from AI review.", len(issues))

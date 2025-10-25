@@ -1,8 +1,9 @@
-"""Module description."""
+"""Module description: Colorized issue renderer for PyCodemark."""
 
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+import json
 
 console = Console()
 
@@ -11,6 +12,7 @@ def print_report(issues: list[dict]):
     """
     Print a table of issues with colored levels.
     Each issue dict must contain: file, line, code, message, level.
+    AI/OpenAI errors are highlighted in magenta, warnings in yellow, others in cyan.
     """
     if not issues:
         console.print("[bold green]✅ No issues found![/bold green]")
@@ -30,27 +32,40 @@ def print_report(issues: list[dict]):
 
         loc = f"{file}:{line} – {code}"
 
-        if level.lower() == "error":
+        # Color logic
+        level_lower = level.lower()
+        if level_lower == "error" and code.lower().startswith("openai"):
+            level_text = Text(level.upper(), style="bold magenta")
+        elif level_lower == "error":
             level_text = Text(level.upper(), style="bold red")
-        elif level.lower() == "warning":
+        elif level_lower == "warning":
             level_text = Text(level.upper(), style="yellow")
         else:
             level_text = Text(level.upper(), style="cyan")
 
-        table.add_row(loc, message, level_text)
+        # Message coloring for AI errors
+        if code.lower().startswith("openai"):
+            message_text = Text(message, style="magenta")
+        elif level_lower == "warning":
+            message_text = Text(message, style="yellow")
+        else:
+            message_text = Text(message)
+
+        table.add_row(loc, message_text, level_text)
 
     console.print(table)
 
 
 def print_json_report(issues: list[dict]):
-    import json
-
+    """
+    Pretty-print issues as JSON using rich.
+    """
     console.print_json(json.dumps(issues, indent=2))
 
 
 def print_sarif_report(issues: list[dict]):
     """
-    Generate SARIF-compatible JSON report
+    Generate SARIF-compatible JSON report.
     """
     sarif_output = {
         "version": "2.1.0",
@@ -75,6 +90,4 @@ def print_sarif_report(issues: list[dict]):
             }
         ],
     }
-    import json
-
     console.print_json(json.dumps(sarif_output, indent=2))
