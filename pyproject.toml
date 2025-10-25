@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycodemark"
-version = "0.5.0"
+version = "0.5.1"
 description = "PyCodemark – a full-featured code review tool for Python."
 authors = ["Roshan <roshanguptamca@gmail.com>"]
 license = "MIT"
