@@ -8,7 +8,7 @@ on:
 
 jobs:
   review:
-    name: Run Codemark Static Analysis
+    name: Run PyCodemark Static Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -30,24 +30,9 @@ jobs:
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
 
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
-
-      - name: Install Dependencies
-        run: poetry install --no-interaction --no-root
-
-      - name: Run Codemark (SARIF)
+      - name: Install Dependencies and Package
+        run: poetry install --no-interaction 
+      - name: Run PyCodemark (Console Output)
         run: |
-          echo "Running Codemark..."
-          # Make sure path matches your layout: pycodemark/src/codemark
-          poetry run codemark review src/codemark --format sarif > codemark.sarif
-
-      - name: Upload SARIF Report to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: codemark.sarif
+          echo "Running PyCodemark..."
+          poetry run pycodemark review src/ --format terminal

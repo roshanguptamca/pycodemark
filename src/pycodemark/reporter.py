@@ -1,4 +1,4 @@
-# src/codemark/reporter.py
+# src/pycodemark/reporter.py
 
 
 def generate_report(issues):

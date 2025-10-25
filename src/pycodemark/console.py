@@ -1,4 +1,4 @@
-# src/codemark/console.py
+# src/pycodemark/console.py
 import argparse
 import sys
 import logging
@@ -8,7 +8,7 @@ from .renderer import print_report, print_json_report, print_sarif_report
 from .smart_reviewer import smart_review
 
 # Logger setup
-logger = logging.getLogger("codemark")
+logger = logging.getLogger("pycodemark")
 logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
@@ -17,8 +17,17 @@ logger.addHandler(ch)
 
 
 def main():
+    """
+    Entry point for PyCodemark CLI.
+
+    Supports two commands:
+      - review: static code analysis
+      - smart-review: AI-powered code review
+
+    Handles output formatting (terminal, JSON, SARIF) and sets proper exit codes.
+    """
     parser = argparse.ArgumentParser(
-        prog="codemark", description="Codemark – a reflective code review tool for Python."
+        prog="pycodemark", description="pycodemark – a reflective code review tool for Python."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

@@ -1,3 +1,4 @@
+# src/pycodemark/smart_reviewer.py
 import os
 import json
 import logging
@@ -31,8 +32,14 @@ def smart_review(path: str, config: dict = None) -> list[dict]:
 
     issues = []
 
-    # Initialize OpenAI client
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    # Only initialize OpenAI client here
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        msg = "OPENAI_API_KEY not set. Skipping AI-powered review."
+        logger.warning(msg)
+        return [{"file": path, "line": 0, "code": "MissingAPIKey", "message": msg}]
+
+    client = OpenAI(api_key=api_key)
 
     # Collect Python files
     python_files = []
@@ -53,6 +60,7 @@ def smart_review(path: str, config: dict = None) -> list[dict]:
         logger.info("Running AI-powered smart review on %s", file_path)
         code = read_file(file_path)
         model = os.environ.get("CODEMARK_MODEL", "gpt-5")
+
         try:
             response = client.chat.completions.create(
                 model=model,

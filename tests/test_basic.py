@@ -1,4 +1,4 @@
 def test_importable():
-    import codemark
+    import pycodemark
 
-    assert hasattr(codemark, "__name__")
+    assert hasattr(pycodemark, "__name__")

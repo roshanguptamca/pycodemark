@@ -55,12 +55,16 @@ pip install pycodemark
 Or with Poetry:
 ```bash
 poetry add pycodemark 
+
+poetry run pycodemark review src/
+poetry run  pycodemark review src/ --format json
+poetry run pycodemark review src/ --format sarif  
 ````
 Run a basic code review:
 ```bash
-codemark review src/
-codemark review src/ --format json
-codemark review src/ --format sarif    
+pycodemark review src/
+pycodemark review src/ --format json
+pycodemark review src/ --format sarif    
 ```
 Environment Variables
 
@@ -77,7 +81,7 @@ This is required for the smart-review command.
 The tool will use this key to authenticate with the OpenAI API.
 
 You can obtain your key from OpenAI API Keys
-2. 2. Optional: Specify AI Model
+2.Optional: Specify AI Model
 
 By default, PyCodemark uses the gpt-5 model for smart reviews. 
 You can override it with the environment variable CODEMARK_MODEL:
@@ -96,7 +100,7 @@ export OPENAI_API_KEY="sk-xxxx"
 export CODEMARK_MODEL="gpt-5"
 
 # Run AI-powered review
-codemark smart-review src/
+pycodemark smart-review src/
 
 ```
 Any issues detected by the AI will appear in the terminal table, JSON, or SARIF output depending on the chosen --format.

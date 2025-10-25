@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycodemark"
-version = "0.3.2"
+version = "0.4.0"
 description = "PyCodemark – a full-featured code review tool for Python."
 authors = ["Roshan <roshanguptamca@gmail.com>"]
 license = "MIT"
@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Utilities"
 ]
-packages = [{include = "codemark", from = "src"}]
+packages = [{include = "pycodemark", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.13"
@@ -34,12 +34,8 @@ setuptools-scm = "^9.2.2"
 black = "^25.9.0"
 
 [tool.poetry.scripts]
-pycodemark = "codemark.console:main"
-codemark = "codemark.console:main"
+pycodemark = "pycodemark.console:main"
 
-[tool.codemark]
-max_line_length = 88
-rules = ["PEP8", "clarity", "docstrings"]
 
 [tool.ruff]
 line-length = 120

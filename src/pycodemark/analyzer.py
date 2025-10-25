@@ -15,8 +15,6 @@ def analyze_file(path, config):
         list[dict]: List of issues as dictionaries with file_path, line, code, and message.
     """
     issues = []
-
-    # Recursively analyze directories
     if os.path.isdir(path):
         for root, _, files in os.walk(path):
             for f in files:
