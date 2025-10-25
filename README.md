@@ -16,11 +16,14 @@ It supports **terminal, JSON, and SARIF output** for CI/CD integration and is ex
 
 ## Features
 
-- Detect missing docstrings, PEP8 violations, and clarity issues
+- Detect missing docstrings, PEP8 violations, clarity issues, type hints, and potential bugs
+- AI-powered smart review using OpenAI GPT models
+- Configurable checks via pycodemark.toml or environment variables
+- Auto-fixable issues: line length, optional template docstrings
+- Color-coded terminal output (green for no issues, yellow/red for warnings/errors)
 - JSON and SARIF output for CI pipelines
 - Plugin system for custom checks
 - Pre-commit integration
-- Configurable via `pyproject.toml`
 - Works with Python 3.13+
 
 ---
@@ -70,7 +73,7 @@ Environment Variables
 
 PyCodemark requires an OpenAI API key to perform AI-powered smart code reviews. You can also optionally specify which OpenAI model to use.
 
-1. OpenAI API Key
+## 1. OpenAI API Key
 
 Set your API key as an environment variable:
 ```bash
@@ -79,9 +82,9 @@ export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
 This is required for the smart-review command.
 
 The tool will use this key to authenticate with the OpenAI API.
-
 You can obtain your key from OpenAI API Keys
-2.Optional: Specify AI Model
+
+## 2.Optional: Specify AI Model
 
 By default, PyCodemark uses the gpt-5 model for smart reviews. 
 You can override it with the environment variable CODEMARK_MODEL:
@@ -94,7 +97,7 @@ If not set, gpt-5 will be used automatically.
 You can specify any OpenAI chat-capable model available to your account.
 Example models: gpt-5, gpt-5.1, gpt-4, gpt-4-32k.
 
-Quick Example:
+# 3. Quick Example:
 ```bash
 export OPENAI_API_KEY="sk-xxxx"
 export CODEMARK_MODEL="gpt-5"
@@ -107,7 +110,7 @@ Any issues detected by the AI will appear in the terminal table, JSON, or SARIF 
 
 If your quota is exceeded or the API fails, the tool will log the error in the report.
 
-4. Security Tips
+# 4. Security Tips
 Do not commit your API key to version control.
 Store keys securely in environment variables or secret managers.
 You can also use .env files with tools like direnv or python-dotenv.
@@ -137,7 +140,7 @@ Then run:
 ```bashpre-commit install
 ```pre-commit install
 ````
-CI/CD Integration (GitHub Actions)
+##  CI/CD Integration (GitHub Actions)
 
 You can integrate PyCodemark in CI pipelines with SARIF reporting.
 Example workflow file: .github/workflows/codemark.yml
@@ -153,11 +156,20 @@ Configuration
 Configure PyCodemark via pyproject.toml:
 ```toml
 [tool.pycodemark]
-max_line_length = 88
-rules = ["PEP8", "clarity", "docstrings"]
+max_line_length = 120
+insert_docstrings = true
+ignore_rules = ["LineLength"]
+checks = { style = true, clarity = true, docstrings = true, type_hints = true, bugs = true, best_practices = true, ai_review = true }
 exclude = ["tests/", "migrations/"]
+
 ```
-Makefile Commands:
+- max_line_length: Maximum allowed characters per line
+- insert_docstrings: Automatically insert template docstrings if missing
+- ignore_rules: Disable specific rules
+- checks: Enable or disable specific checks
+- exclude: Ignore specific files or directories
+
+# Makefile Commands:
 - `make lint`: Run code linting
 - make venv          # Create virtual environment
 - make install       # Install dependencies via Poetry
@@ -171,7 +183,7 @@ Makefile Commands:
 - make publish       # Publish to PyPI
 
 
-Download Documentation:
+## Download Documentation:
 PDF
 HTML
 

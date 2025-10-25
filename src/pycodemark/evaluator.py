@@ -1,3 +1,6 @@
+"""Module description."""
+
+
 def generate_review(results):
     """
     Generate human-readable review feedback from analysis results.
