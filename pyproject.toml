@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycodemark"
-version = "0.3.0"
+version = "0.3.2"
 description = "PyCodemark – a full-featured code review tool for Python."
 authors = ["Roshan <roshanguptamca@gmail.com>"]
 license = "MIT"
@@ -35,6 +35,7 @@ black = "^25.9.0"
 
 [tool.poetry.scripts]
 pycodemark = "codemark.console:main"
+codemark = "codemark.console:main"
 
 [tool.codemark]
 max_line_length = 88

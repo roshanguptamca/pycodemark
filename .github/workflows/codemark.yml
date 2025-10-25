@@ -8,21 +8,46 @@ on:
 
 jobs:
   review:
+    name: Run Codemark Static Analysis
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
       - name: Install Dependencies
-        run: poetry install
+        run: poetry install --no-interaction --no-root
+
       - name: Run Codemark (SARIF)
-        run: poetry run codemark review src/ --format sarif > codemark.sarif
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v2
+        run: |
+          echo "Running Codemark..."
+          # Make sure path matches your layout: pycodemark/src/codemark
+          poetry run codemark review src/codemark --format sarif > codemark.sarif
+
+      - name: Upload SARIF Report to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: codemark.sarif
