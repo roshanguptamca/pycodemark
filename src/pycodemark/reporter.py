@@ -1,3 +1,5 @@
+"""Module description."""
+
 # src/pycodemark/reporter.py
 
 
@@ -39,7 +41,14 @@ def generate_report(issues):
                 file = file_line
                 line = 0
 
-            report.append({"file": file, "line": line, "code": code.strip(), "message": suggestion})
+            report.append(
+                {
+                    "file": file,
+                    "line": line,
+                    "code": code.strip(),
+                    "message": suggestion,
+                }
+            )
         else:
             # Fallback for unexpected formats
             report.append({"file": "unknown", "line": 0, "code": "Unknown", "message": str(issue)})

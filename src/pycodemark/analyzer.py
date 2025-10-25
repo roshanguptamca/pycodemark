@@ -1,76 +1,75 @@
-import ast
+"""Module description."""
+
 import os
-from .plugins import load_plugins
+import subprocess
+from .logger import logger
 
 
-def analyze_file(path, config):
-    """
-    Analyze a Python file or directory for code issues.
-
-    Args:
-        path (str): Path to a file or directory.
-        config (dict): Configuration rules.
-
-    Returns:
-        list[dict]: List of issues as dictionaries with file_path, line, code, and message.
-    """
-    issues = []
+def get_python_files(path: str) -> list[str]:
+    """Return all Python files in a directory or a single file."""
+    files = []
     if os.path.isdir(path):
-        for root, _, files in os.walk(path):
-            for f in files:
+        for root, _, filenames in os.walk(path):
+            for f in filenames:
                 if f.endswith(".py"):
-                    issues += analyze_file(os.path.join(root, f), config)
-        return issues
+                    files.append(os.path.join(root, f))
+    elif path.endswith(".py"):
+        files.append(path)
+    return files
 
-    # Read file content
-    with open(path, "r", encoding="utf-8") as f:
-        code = f.read()
 
-    # Parse AST
+def read_file(file_path: str) -> str:
+    """Read a Python file and return its content."""
     try:
-        tree = ast.parse(code)
-    except SyntaxError as e:
-        issues.append({"file": path, "line": e.lineno, "code": "SyntaxError", "message": str(e)})
-        return issues
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        logger.error("Failed to read file %s: %s", file_path, e)
+        return ""
 
-    # Basic AST checks
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and not ast.get_docstring(node):
-            issues.append(
-                {
-                    "file": path,
-                    "line": node.lineno,
-                    "code": "MissingDocstring",
-                    "message": f"Function '{node.name}' has no docstring.",
-                }
-            )
-        if isinstance(node, ast.Try) and not node.handlers:
-            issues.append(
-                {
-                    "file": path,
-                    "line": node.lineno,
-                    "code": "BareTry",
-                    "message": "Try block without exception handlers.",
-                }
-            )
 
-    # Plugin-based checks
-    plugins = load_plugins()
-    for plugin in plugins:
-        try:
-            plugin_issues = plugin.run(path, config)
-            for issue in plugin_issues:
+def analyze_file(path: str, config: dict) -> list[dict]:
+    """Perform static analysis using simple rules"""
+    issues = []
+    max_len = config.get("max_line_length", 88)
+    ignore = config.get("ignore_rules", [])
+
+    files = get_python_files(path)
+    for file_path in files:
+        content = read_file(file_path)
+        lines = content.splitlines()
+        for i, line in enumerate(lines, start=1):
+            if "LineLength" not in ignore and len(line.rstrip("\n")) > max_len:
                 issues.append(
                     {
-                        "file": path,
-                        "line": issue.get("line"),
-                        "code": issue.get("code"),
-                        "message": issue.get("message"),
+                        "file": file_path,
+                        "line": i,
+                        "code": "LineLength",
+                        "message": f"Line too long ({len(line.rstrip())} > {max_len})",
                     }
                 )
-        except Exception as e:
-            issues.append(
-                {"file": path, "line": 0, "code": "PluginError", "message": f"Plugin {plugin.__name__} failed: {e}"}
-            )
-
+            if "MissingDocstring" not in ignore and i == 1 and not line.strip().startswith('"""'):
+                issues.append(
+                    {
+                        "file": file_path,
+                        "line": i,
+                        "code": "MissingDocstring",
+                        "message": "Missing file docstring",
+                    }
+                )
     return issues
+
+
+def auto_fix_file(file_path: str, line_length: int = 88) -> bool:
+    """Automatically fix code using black"""
+    try:
+        subprocess.run(
+            ["black", "--line-length", str(line_length), file_path],
+            check=True,
+            capture_output=True,
+        )
+        logger.info("Auto-fixed %s", file_path)
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error("Failed to auto-fix %s: %s", file_path, e.stderr.decode())
+        return False
