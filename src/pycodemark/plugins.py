@@ -1,3 +1,5 @@
+"""Module description."""
+
 import importlib
 import pkgutil
 

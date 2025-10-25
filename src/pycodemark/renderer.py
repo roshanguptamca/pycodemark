@@ -1,73 +1,80 @@
-import json
+"""Module description."""
+
 from rich.console import Console
-from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 console = Console()
 
 
-def print_report(report):
-    """Print report to terminal with rich panels."""
-    if not report:
-        console.print("[green]✓ No issues found. Your code looks good![/green]")
+def print_report(issues: list[dict]):
+    """
+    Print a table of issues with colored levels.
+    Each issue dict must contain: file, line, code, message, level.
+    """
+    if not issues:
+        console.print("[bold green]✅ No issues found![/bold green]")
         return
 
-    for issue in report:
-        if isinstance(issue, dict):
-            file = issue.get("file", "unknown")
-            line = issue.get("line", 0)
-            code = issue.get("code", "")
-            message = issue.get("message", "")
-            panel_content = f"[bold]{file}:{line} – {code}[/bold]\n[salmon1]{message}[/salmon1]"
+    table = Table(show_header=True, header_style="bold cyan", expand=True)
+    table.add_column("Location", style="bold", no_wrap=True)
+    table.add_column("Message", style="bold")
+    table.add_column("Level", style="bold")
+
+    for issue in issues:
+        file = issue.get("file", "<unknown>")
+        line = issue.get("line", 0)
+        code = issue.get("code", "")
+        message = issue.get("message", "")
+        level = issue.get("level", "warning")
+
+        loc = f"{file}:{line} – {code}"
+
+        if level.lower() == "error":
+            level_text = Text(level.upper(), style="bold red")
+        elif level.lower() == "warning":
+            level_text = Text(level.upper(), style="yellow")
         else:
-            summary, suggestion = issue
-            panel_content = f"[bold]{summary}[/bold]\n[salmon1]{suggestion}[/salmon1]"
+            level_text = Text(level.upper(), style="cyan")
 
-        console.print(Panel(panel_content, border_style="blue"))
+        table.add_row(loc, message, level_text)
 
-
-def print_json_report(report):
-    """Print report as JSON."""
-    json_report = []
-    for issue in report:
-        if isinstance(issue, dict):
-            json_report.append(issue)
-        else:
-            summary, suggestion = issue
-            json_report.append({"summary": summary, "suggestion": suggestion})
-    print(json.dumps(json_report, indent=2))
+    console.print(table)
 
 
-def print_sarif_report(report):
-    """Print report in SARIF format for CI integration."""
-    sarif_results = []
-    for issue in report:
-        if isinstance(issue, dict):
-            file = issue.get("file", "unknown")
-            line = issue.get("line", 0)
-            code = issue.get("code", "UNKNOWN")
-            message = issue.get("message", "")
-        else:
-            file_line, code = issue[0].split(" – ") if " – " in issue[0] else ("unknown", "UNKNOWN")
-            file = file_line.split(":")[0]
-            line = int(file_line.split(":")[1]) if ":" in file_line else 0
-            message = issue[1]
+def print_json_report(issues: list[dict]):
+    import json
 
-        sarif_results.append(
-            {
-                "ruleId": code,
-                "message": {"text": message},
-                "locations": [{"physicalLocation": {"artifactLocation": {"uri": file}, "region": {"startLine": line}}}],
-            }
-        )
+    console.print_json(json.dumps(issues, indent=2))
 
-    sarif = {
+
+def print_sarif_report(issues: list[dict]):
+    """
+    Generate SARIF-compatible JSON report
+    """
+    sarif_output = {
         "version": "2.1.0",
         "runs": [
             {
-                "tool": {"driver": {"name": "Codemark", "informationUri": "https://github.com/your/codemark"}},
-                "results": sarif_results,
+                "tool": {"driver": {"name": "PyCodemark"}},
+                "results": [
+                    {
+                        "ruleId": issue.get("code", ""),
+                        "message": {"text": issue.get("message", "")},
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": issue.get("file", "")},
+                                    "region": {"startLine": issue.get("line", 0)},
+                                }
+                            }
+                        ],
+                    }
+                    for issue in issues
+                ],
             }
         ],
     }
+    import json
 
-    print(json.dumps(sarif, indent=2))
+    console.print_json(json.dumps(sarif_output, indent=2))

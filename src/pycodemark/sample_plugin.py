@@ -1,3 +1,6 @@
+"""Module description."""
+
+
 def run(file_path, config):
     """
     Sample plugin that reports functions with more than 50 lines.
