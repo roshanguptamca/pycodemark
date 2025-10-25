@@ -31,7 +31,7 @@ jobs:
           poetry config virtualenvs.in-project true
 
       - name: Install Dependencies and Package
-        run: poetry install --no-interaction 
+        run: poetry install --no-interaction
       - name: Run PyCodemark (Console Output)
         run: |
           echo "Running PyCodemark..."
